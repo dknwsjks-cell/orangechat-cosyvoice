@@ -13,22 +13,44 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       ANDROID_HOME: /usr/local/lib/android/sdk
+      GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx6g -Dorg.gradle.configuration-cache=false -Dorg.gradle.caching=false"
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
 
     - name: Accept Android SDK licenses
-      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+      run: |
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+    - name: Install required SDK components
+      run: |
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-37" "build-tools;37.0.0" "platform-tools" "cmake;3.22.1" "ndk;26.1.10909125"
 
     - name: Install pnpm
-      run: npm install -g pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.x
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'pnpm'
+        cache-dependency-path: web-ui/pnpm-lock.yaml
+
+    - name: Install web-ui dependencies
+      working-directory: web-ui
+      run: pnpm install --frozen-lockfile
 
     - name: Grant gradlew permission
       run: chmod +x gradlew
@@ -36,11 +58,7 @@ jobs:
     - name: Build APK
       run: |
         set -o pipefail
-        ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-      env:
-        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g"
-        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-        ANDROID_HOME: /usr/local/lib/android/sdk
+        ./gradlew :app:assembleDebug --no-daemon --stacktrace --no-configuration-cache 2>&1 | tee build.log
 
     - name: Upload build log (on failure)
       if: failure()
@@ -57,7 +75,7 @@ jobs:
         echo "=== Find all .aab files ==="
         find . -name "*.aab" -ls 2>/dev/null || true
         echo "=== Build output tree ==="
-        find app/build -type f 2>/dev/null | head -30 || echo "No build outputs"
+        find app/build -type f 2>/dev/null | head -50 || echo "No build outputs"
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
