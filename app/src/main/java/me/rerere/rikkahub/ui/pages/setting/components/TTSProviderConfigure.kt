@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
@@ -1399,7 +1400,7 @@ private fun CosyVoiceTTSConfiguration(
                         Text(if (showErrorLog) "收起错误日志" else "查看错误日志")
                     }
                     if (showErrorLog) {
-                        Text(text = message, style = androidx.compose.ui.text.TextStyle(fontSize = androidx.compose.ui.unit.sp(12)))
+                        Text(text = message, style = TextStyle(fontSize = 12.sp))
                     }
                 }
             }
