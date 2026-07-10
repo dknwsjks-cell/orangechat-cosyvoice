@@ -1,0 +1,14 @@
+{
+  "id": "com.orangechat.plugin.pomodoro",
+  "name": "番茄钟",
+  "version": "1.0.0",
+  "description": "专注25分钟，AI陪伴督促",
+  "author": "橘瓣",
+  "icon": "🍅",
+  "entry": "main.js",
+  "permissions": ["ai_chat"],
+  "customPageWebView": {
+    "entry": "ui/index.html"
+  },
+  "config": []
+}

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
+<title>橘市商业街</title>
+<style>
+:root{--paper:#f5efe0;--paper2:#ede4cf;--paper3:#e2d5b8;--ink:#2a1f0e;--ink2:#5c4a2a;--ink3:#9c8660;--red:#b33a3a;--gold:#a07820;--gold2:#c49a28;--card:#faf5e8;--border:#c8b48a;--border2:#a08858}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--paper);color:var(--ink);font-family:Georgia,'Times New Roman','STSong','SimSun',serif;font-size:13px;margin:0;padding:0;-webkit-user-select:none}
+.app{display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden}
+.hd{flex-shrink:0;background:var(--ink);padding:11px 14px 10px}
+.hd-top{display:flex;align-items:center;gap:10px}
+.hd-seal{width:36px;height:36px;border-radius:50%;background:var(--red);border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hd-brand{flex:1}
+.hd-title{font-size:17px;font-weight:700;color:#f5efe0;letter-spacing:4px}
+.hd-sub{font-size:9px;color:rgba(245,239,224,.45);letter-spacing:1px;margin-top:1px}
+.coin-bar{display:flex;align-items:center;gap:8px;margin-top:9px;padding:6px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:2px}
+.coin-bar span{font-size:13px;color:var(--gold2);font-weight:700;flex:1;letter-spacing:1px}
+.coin-bar button{padding:4px 10px;background:transparent;border:1px solid var(--gold);color:var(--gold2);font-size:10px;letter-spacing:1px;cursor:pointer;font-family:inherit;border-radius:2px}
+.coin-bar button:active{background:var(--gold);color:var(--ink)}
+.tabs{display:flex;flex-shrink:0;background:var(--paper2);border-bottom:2px solid var(--border2)}
+.tab{flex:1;padding:9px 0 8px;text-align:center;font-size:11px;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:1px}
+.tab.active{color:var(--red);border-bottom-color:var(--red);background:var(--paper)}
+.tab .ti{font-size:15px;display:block;margin-bottom:2px}
+.body{display:flex;flex:1;overflow:hidden;position:relative}
+.content{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+.page{display:none}.page.active{display:block}
+
+/* sidebar */
+.sidebar{position:absolute;right:0;top:0;bottom:0;width:90%;max-width:340px;background:var(--paper);border-left:2px solid var(--border2);display:flex;flex-direction:column;z-index:15;transform:translateX(100%);transition:transform .25s ease}
+.sidebar.open{transform:translateX(0)}
+.sb-hd{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#f5efe0;flex-shrink:0}
+.sb-hd span{font-weight:700;font-size:12px;letter-spacing:1px}
+.sb-cl{background:none;border:none;color:rgba(245,239,224,.7);font-size:16px;cursor:pointer;line-height:1}
+.sb-body{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+
+/* 上架表单分区 */
+.form-sec{margin-bottom:14px}
+.form-label{font-size:10px;color:var(--ink3);letter-spacing:1px;margin-bottom:5px}
+.form-hint{font-size:10px;color:var(--ink3);margin-top:4px;line-height:1.5;font-style:italic}
+.textarea{width:100%;padding:9px 11px;border:1px solid var(--border);font-size:12px;font-family:inherit;background:var(--paper);color:var(--ink);outline:none;border-radius:2px;resize:vertical;min-height:80px;line-height:1.5}
+.textarea:focus{border-color:var(--gold)}
+
+.card{background:var(--card);border:1px solid var(--border);padding:13px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;letter-spacing:1px;color:var(--ink)}
+.card-sub{font-size:11px;color:var(--ink3);margin-bottom:6px;letter-spacing:.5px}
+.banner{background:var(--ink);border:1px solid var(--border2);padding:16px 14px 13px;margin-bottom:10px;text-align:center;color:#f5efe0}
+.banner-icon{font-size:40px;line-height:1}
+.banner-name{font-size:18px;font-weight:700;letter-spacing:3px;margin-top:5px;text-shadow:1px 1px 0 rgba(0,0,0,.4)}
+.banner-type{font-size:10px;color:rgba(245,239,224,.5);letter-spacing:2px;margin-top:3px}
+.banner-stats{display:flex;margin-top:10px;padding-top:10px;border-top:1px solid rgba(245,239,224,.12)}
+.stat{flex:1;text-align:center}
+.stat+.stat{border-left:1px solid rgba(245,239,224,.12)}
+.stat-v{font-size:17px;font-weight:700;color:var(--gold2)}
+.stat-l{font-size:9px;color:rgba(245,239,224,.4);margin-top:2px;letter-spacing:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;letter-spacing:1px;border-radius:2px}
+.btn:active{opacity:.8;transform:scale(.97)}
+.btn-p{background:var(--red);color:#faf5e8;border:1px solid #8a2020;box-shadow:0 2px 0 #6a1818}
+.btn-p:active{box-shadow:none;transform:translateY(1px)}
+.btn-o{background:transparent;border:1px solid var(--border2);color:var(--ink2)}
+.btn-g{background:var(--gold);color:var(--ink);border:1px solid #7a5c10;box-shadow:0 2px 0 #5a4010}
+.btn-g:active{box-shadow:none;transform:translateY(1px)}
+.btn-sm{padding:5px 11px;font-size:10px}
+.btn-block{width:100%;display:flex}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shop-card{background:var(--card);border:1px solid var(--border);padding:12px 10px;cursor:pointer;border-radius:2px}
+.shop-card:active{background:var(--paper2);border-color:var(--gold)}
+.shop-icon{font-size:26px;margin-bottom:5px;line-height:1}
+.shop-name{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
+.shop-meta{font-size:10px;color:var(--ink3)}
+
+/* 商品行 */
+.prod{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--border);gap:8px}
+.prod:last-child{border-bottom:none}
+.prod-info{flex:1;min-width:0}
+.prod-name{font-size:12px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:5px}
+.prod-lock{font-size:11px;color:var(--ink3)}
+.prod-desc{font-size:10px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.prod-secret{font-size:10px;color:var(--ink3);margin-top:3px;font-style:italic;letter-spacing:.5px}
+.prod-price{font-size:12px;color:var(--red);font-weight:700;white-space:nowrap;flex-shrink:0;padding-top:1px}
+/* 购买后显示的内容块 */
+.unlocked-box{margin-top:6px;padding:8px 10px;background:var(--paper2);border:1px solid var(--border);border-left:3px solid var(--gold);font-size:11px;line-height:1.6;color:var(--ink2);word-break:break-all}
+
+.visit{display:flex;gap:8px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:11px}
+.visit:last-child{border-bottom:none}
+.visit-av{width:28px;height:28px;background:var(--paper2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border-radius:2px}
+.visit-body{flex:1}
+.visit-name{font-weight:700;letter-spacing:.5px}
+.visit-msg{color:var(--ink2);margin-top:1px;line-height:1.4}
+.visit-time{font-size:9px;color:var(--ink3);margin-top:2px}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
+.type-area-label{font-size:10px;color:var(--gold);letter-spacing:1px;margin:10px 0 4px;padding-bottom:3px;border-bottom:1px dashed var(--gold)}
+.type-grid.wide{grid-template-columns:repeat(4,1fr)}
+.type-item{text-align:center;padding:12px 5px;border:1px solid var(--border);cursor:pointer;background:var(--paper);border-radius:2px}
+.type-item.sel{border-color:var(--red);background:rgba(179,58,58,.07);box-shadow:0 0 0 2px rgba(179,58,58,.2)}
+.type-item:active{transform:scale(.95)}
+.type-icon{font-size:24px}
+.type-name{font-size:9px;margin-top:4px;color:var(--ink2);letter-spacing:.5px;line-height:1.4}
+.input{width:100%;padding:9px 11px;border:1px solid var(--border);font-size:12px;font-family:inherit;background:var(--paper);color:var(--ink);outline:none;border-radius:2px}
+.input:focus{border-color:var(--gold)}
+.input::placeholder{color:var(--ink3)}
+.evbanner{background:var(--ink);border:1px solid var(--border2);padding:13px 14px;margin-bottom:10px;color:#f5efe0}
+.evbanner-hd{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(245,239,224,.12)}
+.evrow{padding:5px 0;font-size:11px;color:rgba(245,239,224,.8);border-bottom:1px solid rgba(245,239,224,.07);line-height:1.5}
+.evrow:last-child{border-bottom:none}
+.evmult{color:var(--gold2);font-weight:700;margin-left:5px}
+.review{padding:7px 0;border-bottom:1px dashed var(--border);font-size:11px}
+.review:last-child{border-bottom:none}
+.review-stars{color:var(--gold)}
+.review-text{color:var(--ink2);margin-top:2px;line-height:1.5}
+.review-author{font-weight:700}
+.empty{text-align:center;padding:34px 20px;color:var(--ink3)}
+.empty-i{font-size:40px;margin-bottom:8px;opacity:.6}
+.empty-t{font-size:12px;letter-spacing:1px;line-height:1.7}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#f5efe0;padding:8px 18px;font-size:11px;letter-spacing:1px;display:none;z-index:999;max-width:82%;text-align:center;border:1px solid var(--border2);border-radius:2px}
+.toast.show{display:block}
+.loading{text-align:center;padding:28px;color:var(--ink3);font-size:11px;letter-spacing:1px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* 我的商品行（含下架按钮） */
+.my-prod{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--border);gap:8px}
+.my-prod:last-child{border-bottom:none}
+.my-prod-info{flex:1;min-width:0}
+.my-prod-name{font-size:12px;font-weight:700;letter-spacing:.5px}
+.my-prod-meta{font-size:10px;color:var(--ink3);margin-top:2px}
+.my-prod-secret{font-size:10px;color:var(--gold);margin-top:2px;font-style:italic}
+.file-btn{display:flex;align-items:center;gap:8px;padding:9px 11px;border:1px dashed var(--border2);background:var(--paper);cursor:pointer;border-radius:2px;font-size:11px;color:var(--ink2);letter-spacing:.5px;position:relative;overflow:hidden}
+.file-btn input[type=file]{position:absolute;width:100%;height:100%;top:0;left:0;opacity:0;cursor:pointer;font-size:0}
+.file-btn:active{background:var(--paper2)}
+.upload-status{margin-top:6px;font-size:10px;color:var(--ink3);letter-spacing:.5px;line-height:1.5}
+.upload-bar{height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.upload-bar-fill{height:100%;background:var(--gold);width:0%;transition:width .3s}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hd">
+    <div class="hd-top">
+      <div class="hd-seal">🏮</div>
+      <div class="hd-brand">
+        <div class="hd-title">橘市商业街</div>
+        <div class="hd-sub">和 AI 伴侣一起经营店铺的商业社区</div>
+      </div>
+    </div>
+    <div class="coin-bar">
+      <span id="coinDisplay">加载中...</span>
+      <button onclick="claimDaily()">每日签到</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('home')" id="tab-home"><span class="ti">🏠</span>我的店</div>
+    <div class="tab" onclick="switchTab('street')" id="tab-street"><span class="ti">🛍️</span>逛街</div>
+    <div class="tab" onclick="switchTab('events')" id="tab-events"><span class="ti">📜</span>今日事件</div>
+  </div>
+  <div class="body">
+    <div class="content">
+      <div class="page active" id="page-home"><div id="homeContent"><div class="loading"><div class="spin"></div><br>加载中...</div></div></div>
+      <div class="page" id="page-street"><div id="streetContent"><div class="loading"><div class="spin"></div><br>加载中...</div></div></div>
+      <div class="page" id="page-events"><div id="eventsContent"><div class="loading"><div class="spin"></div><br>加载中...</div></div></div>
+    </div>
+
+    <!-- 侧边栏：店铺详情 -->
+    <div class="sidebar" id="sbShop">
+      <div class="sb-hd"><span id="sbShopTitle">店铺详情</span><button class="sb-cl" onclick="closeSidebar('sbShop')">✕</button></div>
+      <div class="sb-body" id="sbShopBody"><div class="loading"><div class="spin"></div></div></div>
+    </div>
+
+    <!-- 侧边栏：上架商品（内容动态切换） -->
+    <div class="sidebar" id="sbAddProd">
+      <div class="sb-hd"><span id="sbAddProdTitle">上架商品</span><button class="sb-cl" onclick="closeSidebar('sbAddProd')">✕</button></div>
+      <div class="sb-body" id="sbAddProdBody"></div>
+    </div>
+
+    <!-- 侧边栏：开店注册 -->
+    <div class="sidebar" id="sbRegister">
+      <div class="sb-hd"><span>开店啦！</span><button class="sb-cl" onclick="closeSidebar('sbRegister')">✕</button></div>
+      <div class="sb-body">
+        <div class="card-sub" style="margin-bottom:4px">选择店铺类型</div>
+        <div class="type-grid" id="typeGrid"></div>
+        <div style="margin-top:10px"><input class="input" id="shopNameInput" placeholder="给你的店取个名字"></div>
+        <button class="btn btn-g btn-block" style="margin-top:11px" onclick="registerShop()">开业大吉</button>
+      </div>
+    </div>
+
+    <!-- 侧边栏：购买后内容解锁 -->
+    <div class="sidebar" id="sbUnlock">
+      <div class="sb-hd"><span id="sbUnlockTitle">已解锁内容</span><button class="sb-cl" onclick="closeSidebar('sbUnlock')">✕</button></div>
+      <div class="sb-body" id="sbUnlockBody"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var state={data:null,selectedType:null,currentShopId:null,shopType:null};
+var SHOP_TYPES={
+  oden:{name:'关东煮烤肠店',icon:'🍢',area:'virtual'},
+  coffee:{name:'咖啡店',icon:'☕',area:'virtual'},
+  bookstore:{name:'书店',icon:'📚',area:'virtual'},
+  arcade:{name:'电玩城',icon:'🎮',area:'virtual'},
+  milktea:{name:'奶茶店',icon:'🧋',area:'virtual'},
+  persona:{name:'人设商店',icon:'🎭',area:'real'},
+  font:{name:'字体商店',icon:'🔤',area:'real'},
+  custom:{name:'自定义商店',icon:'🏪',area:'real'}
+};
+
+var lastVisitPollTime=null;
+var visitPollTimer=null;
+
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+function callTool(name,params){if(!window.Bridge)return Promise.reject(new Error('Bridge 未就绪'));return Bridge.callTool(name,JSON.stringify(params||{}));}
+function wfb(cb){var s=Date.now();(function w(){if(window.Bridge)return cb();if(Date.now()-s>2000){cb();return;}setTimeout(w,100);})();}
+function openSidebar(id){document.getElementById(id).classList.add('open');}
+function closeSidebar(id){document.getElementById(id).classList.remove('open');}
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='street')loadStreet();
+  if(name==='events')loadEvents();
+}
+function stars(r){var s='';for(var i=0;i<5;i++)s+=i<Math.round(r)?'★':'☆';return s;}
+function timeAgo(ts){if(!ts)return'';var d=Date.now()-new Date(ts).getTime(),m=Math.floor(d/60000);if(m<1)return'刚刚';if(m<60)return m+'分钟前';var h=Math.floor(m/60);if(h<24)return h+'小时前';return Math.floor(h/24)+'天前';}
+
+function init(){
+  try{
+    Bridge.getPluginConfig().then(function(cfg){
+      state.userNickname=(cfg&&cfg.user_nickname)||'用户';
+      state.aiNickname=(cfg&&cfg.ai_nickname)||'AI';
+      loadHome();
+    }).catch(function(e){
+      console.error('[init] getPluginConfig failed:',e);
+      state.userNickname='用户';state.aiNickname='AI';loadHome();
+    });
+  }catch(e){
+    console.error('[init] Bridge error:',e);
+    state.userNickname='用户';state.aiNickname='AI';loadHome();
+  }
+}
+
+async function loadHome(){
+  try{
+    var res=await callTool('market_get_status');
+    if(res&&res.success){
+      state.data=res.data;
+      document.getElementById('coinDisplay').textContent=res.data.coins+' 橘币';
+      renderHome();
+    }else{
+      document.getElementById('homeContent').innerHTML='<div class="empty"><div class="empty-i">😵</div><div class="empty-t">加载失败：'+(res&&res.error||'未知错误')+'</div></div>';
+    }
+  }catch(e){
+    console.error('[loadHome]',e);
+    document.getElementById('homeContent').innerHTML='<div class="empty"><div class="empty-i">😵</div><div class="empty-t">Bridge 错误：'+e.message+'</div></div>';
+  }
+}
+
+async function claimDaily(){
+  try{
+    var res=await callTool('market_claim_daily_bonus');
+    if(res&&res.success){toast(res.data.message);document.getElementById('coinDisplay').textContent=res.data.totalCoins+' 橘币';state.data.coins=res.data.totalCoins;}
+    else toast(res&&res.error||'领取失败');
+  }catch(e){toast('错误: '+e.message);}
+}
+
+function renderHome(){
+  var d=state.data,el=document.getElementById('homeContent');
+  if(!d.hasShop){
+    el.innerHTML='<div class="empty"><div class="empty-i">🏪</div><div class="empty-t">你还没有在橘市开店</div><button class="btn btn-p" style="margin-top:13px" onclick="showRegister()">立即开店</button></div>';
+    return;
+  }
+  var s=d.shop;
+  state.shopType=s.type;
+  var visitHtml=s.recentVisits&&s.recentVisits.length>0
+    ?s.recentVisits.map(function(v){return'<div class="visit"><div class="visit-av">🤖</div><div class="visit-body"><div class="visit-name">'+v.visitorAiName+'</div><div class="visit-msg">'+(v.message||'')+'</div><div class="visit-time">'+timeAgo(v.time)+'</div></div></div>';}).join('')
+    :'<div style="text-align:center;padding:13px;color:var(--ink3);font-size:11px;letter-spacing:1px">还没有访客～</div>';
+  el.innerHTML=
+    '<div class="banner">'+
+      '<div class="banner-icon">'+s.typeIcon+'</div>'+
+      '<div class="banner-name">'+s.name+'</div>'+
+      '<div class="banner-type">'+s.typeName+'&ensp;·&ensp;Lv.'+s.level+'&ensp;·&ensp;'+stars(s.rating)+' '+s.rating+'</div>'+
+      '<div class="banner-stats">'+
+        '<div class="stat"><div class="stat-v">'+s.todayRevenue+'</div><div class="stat-l">今日收入</div></div>'+
+        '<div class="stat"><div class="stat-v">'+s.totalRevenue+'</div><div class="stat-l">累计收入</div></div>'+
+        '<div class="stat"><div class="stat-v">'+s.visitCount+'</div><div class="stat-l">访客总计</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div class="card-title">商品清单&ensp;<button class="btn btn-sm btn-o" style="margin-left:auto;font-size:9px" onclick="showAddProd()">＋ 上架</button></div>'+
+      '<div id="productList"><div class="loading"><div class="spin"></div></div></div>'+
+    '</div>'+
+    '<div class="card"><div class="card-title">最近到访</div>'+visitHtml+'</div>';
+  loadProducts();
+  startVisitPolling();
+}
+
+async function loadProducts(){
+  try{
+    var res=await callTool('market_get_own_products');
+    var el=document.getElementById('productList');if(!el)return;
+    if(res&&res.success&&res.data.products.length>0){
+      var stype=state.shopType;
+      el.innerHTML=res.data.products.map(function(p){
+        var meta='';
+        if(stype==='persona') meta='<div class="my-prod-secret">🔒 人设内容已隐藏，购买后解锁</div>';
+        else if(stype==='font') meta='<div class="my-prod-secret">📦 字体包：'+(p.resourceUrl?'文件已上传':'⚠️ 文件未上传')+'</div>';
+        else meta=p.description?'<div class="my-prod-meta">'+p.description+'</div>':'';
+        return'<div class="my-prod">'+
+          '<div class="my-prod-info">'+
+            '<div class="my-prod-name">'+p.name+'</div>'+
+            meta+
+          '</div>'+
+          '<div class="prod-price">'+p.price+' 🍊</div>'+
+        '</div>';
+      }).join('');
+    }else{
+      el.innerHTML='<div style="text-align:center;padding:11px;color:var(--ink3);font-size:11px;letter-spacing:1px">还没有商品，点击上架</div>';
+    }
+  }catch(e){console.error('[loadProducts]',e);}
+}
+
+// ===== 上架表单：根据店铺类型动态渲染 =====
+function showAddProd(){
+  var stype=state.shopType||'custom';
+  var title='上架商品';
+  var html='';
+
+  if(stype==='persona'){
+    title='上架人设卡';
+    html=
+      '<div class="form-sec">'+
+        '<div class="form-label">人设卡标题（顾客可见）</div>'+
+        '<input class="input" id="apName" placeholder="如：傲娇猫娘 / 老板专属总裁">'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">人设内容（购买后才解锁，顾客无法提前看到）</div>'+
+        '<textarea class="textarea" id="apSecret" placeholder="在这里写完整的人设卡内容，包括性格、说话方式、背景故事等…"></textarea>'+
+        '<div class="form-hint">顾客购买后将直接看到此处内容，请写完整。</div>'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">定价（橘币）</div>'+
+        '<input class="input" id="apPrice" type="number" placeholder="建议 50～500" min="1">'+
+      '</div>'+
+      '<button class="btn btn-p btn-block" onclick="doAddProduct()">确认上架</button>';
+  } else if(stype==='font'){
+    title='上架字体包';
+    html=
+      '<div class="form-sec">'+
+        '<div class="form-label">字体名称（顾客可见）</div>'+
+        '<input class="input" id="apName" placeholder="如：手写复古毛笔体">'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">字体描述（顾客可见）</div>'+
+        '<input class="input" id="apDesc" placeholder="简单介绍字体风格、适用场景">'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">字体包文件（上传到 Storage，购买后可下载）</div>'+
+        '<div class="file-btn" id="apFileLabel" onclick="onPickFontFile()">'+
+          '<span id="apFileIcon">📂</span>'+
+          '<span id="apFileName">点击选择字体文件（.ttf .otf .zip 等）</span>'+
+        '</div>'+
+        '<div class="upload-status" id="uploadStatus"></div>'+
+        '<div class="upload-bar" id="uploadBar" style="display:none"><div class="upload-bar-fill" id="uploadBarFill"></div></div>'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">定价（橘币）</div>'+
+        '<input class="input" id="apPrice" type="number" placeholder="建议 30～300" min="1">'+
+      '</div>'+
+      '<button class="btn btn-p btn-block" id="apSubmitBtn" onclick="doAddProduct()">确认上架</button>';
+  } else {
+    title='上架商品';
+    html=
+      '<div class="form-sec">'+
+        '<div class="form-label">商品名称</div>'+
+        '<input class="input" id="apName" placeholder="商品名称">'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">商品描述（顾客可见）</div>'+
+        '<textarea class="textarea" id="apDesc" placeholder="描述你的商品内容…" style="min-height:60px"></textarea>'+
+      '</div>'+
+      '<div class="form-sec">'+
+        '<div class="form-label">定价（橘币）</div>'+
+        '<input class="input" id="apPrice" type="number" placeholder="定价" min="1">'+
+      '</div>'+
+      '<button class="btn btn-p btn-block" onclick="doAddProduct()">确认上架</button>';
+  }
+
+  document.getElementById('sbAddProdTitle').textContent=title;
+  document.getElementById('sbAddProdBody').innerHTML=html;
+  openSidebar('sbAddProd');
+}
+
+
+// ===== Storage: 字体文件上传 =====
+var SB_URL='https://nvkcztwjlbszvwkvbetf.supabase.co';
+var SB_KEY='sb_publishable_UEd2Pn0kR2sau1Xsfk2TQw_oHC8pRhS';
+
+function onFontFileChange(){
+  var input=document.getElementById('apFile');
+  var label=document.getElementById('apFileName');
+  if(input&&input.files&&input.files[0]){
+    label.textContent=input.files[0].name;
+    document.getElementById('apFileIcon').textContent='📄';
+  }
+}
+
+// 存储通过 Bridge 选择的文件
+var pickedFontFile=null;
+
+async function onPickFontFile(){
+  try{
+    var result=await Bridge.pickBinaryFile();
+    if(result&&result.success){
+      pickedFontFile=result;
+      document.getElementById('apFileName').textContent=result.fileName;
+      document.getElementById('apFileIcon').textContent='📄';
+    }else{
+      toast('未选择文件');
+    }
+  }catch(e){
+    toast('选择文件失败: '+e.message);
+  }
+}
+
+async function uploadFontFile(fileData){
+  var shopId=(state.data&&state.data.shop)?state.data.shop.id:'unknown';
+  // 文件名：时间戳_原始文件名，避免冲突
+  var safeName=fileData.fileName.replace(/[^a-zA-Z0-9._\-]/g,'_');
+  var path='font/'+shopId+'/'+Date.now()+'_'+safeName;
+
+  var statusEl=document.getElementById('uploadStatus');
+  var barEl=document.getElementById('uploadBar');
+  var fillEl=document.getElementById('uploadBarFill');
+  var btnEl=document.getElementById('apSubmitBtn');
+  if(statusEl) statusEl.textContent='上传中...';
+  if(barEl) barEl.style.display='block';
+  if(fillEl) fillEl.style.width='10%';
+  if(btnEl) btnEl.disabled=true;
+
+  try{
+    // base64 → Blob
+    var byteStr=atob(fileData.base64);
+    var ab=new ArrayBuffer(byteStr.length);
+    var ia=new Uint8Array(ab);
+    for(var i=0;i<byteStr.length;i++)ia[i]=byteStr.charCodeAt(i);
+    var blob=new Blob([ab],{type:fileData.mimeType||'application/octet-stream'});
+
+    var res=await fetch(SB_URL+'/storage/v1/object/market-files/'+path,{
+      method:'POST',
+      headers:{
+        'apikey':SB_KEY,
+        'Authorization':'Bearer '+SB_KEY,
+        'Content-Type':fileData.mimeType||'application/octet-stream',
+        'x-upsert':'true'
+      },
+      body:blob
+    });
+    if(!res.ok){
+      var err=await res.text();
+      throw new Error('上传失败: '+res.status+' '+err);
+    }
+    if(fillEl) fillEl.style.width='100%';
+    if(statusEl) statusEl.textContent='✓ 上传成功：'+fileData.fileName;
+    if(btnEl) btnEl.disabled=false;
+    return path;
+  }catch(e){
+    console.error('[uploadFontFile]',e);
+    if(statusEl) statusEl.textContent='✗ '+e.message;
+    if(fillEl) fillEl.style.width='0%';
+    if(btnEl) btnEl.disabled=false;
+    toast('上传失败：'+e.message);
+    return null;
+  }
+}
+
+async function getSignedUrl(storagePath){
+  // 生成30分钟有效的签名下载链接
+  var res=await fetch(SB_URL+'/storage/v1/object/sign/market-files/'+storagePath,{
+    method:'POST',
+    headers:{
+      'apikey':SB_KEY,
+      'Authorization':'Bearer '+SB_KEY,
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({expiresIn:1800})
+  });
+  if(!res.ok){
+    var err=await res.text();
+    throw new Error('签名失败: '+res.status+' '+err);
+  }
+  var data=await res.json();
+  // 返回完整URL
+  return SB_URL+'/storage/v1'+data.signedURL;
+}
+
+async function doAddProduct(){
+  var stype=state.shopType||'custom';
+  var name=(document.getElementById('apName')||{}).value||'';
+  name=name.trim();
+  var price=parseInt((document.getElementById('apPrice')||{}).value||'0');
+  if(!name||!price){toast('请填写名称和价格');return;}
+
+  var description='',resourceUrl=null;
+  if(stype==='persona'){
+    var secret=(document.getElementById('apSecret')||{}).value||'';
+    description=secret.trim(); // 内容存在description，前端控制展示
+  } else if(stype==='font'){
+    var desc=(document.getElementById('apDesc')||{}).value||'';
+    description=desc.trim();
+    // 使用通过 Bridge 选择的文件
+    if(!pickedFontFile){toast('请选择字体文件');return;}
+    resourceUrl=await uploadFontFile(pickedFontFile);
+    pickedFontFile=null; // 清理
+    if(!resourceUrl){return;} // uploadFontFile内部已toast
+  } else {
+    var descEl=document.getElementById('apDesc');
+    description=descEl?(descEl.value||'').trim():'';
+  }
+
+  try{
+    var params={action:'add',name:name,description:description,price:price};
+    if(resourceUrl) params.resource_url=resourceUrl;
+    var res=await callTool('market_manage_products',params);
+    if(res&&res.success){
+      toast(res.data.message);
+      closeSidebar('sbAddProd');
+      loadProducts();
+    }else toast(res&&res.error||'添加失败');
+  }catch(e){toast('错误: '+e.message);}
+}
+
+// ===== 开店注册 =====
+function showRegister(){
+  var grid=document.getElementById('typeGrid');
+  var virtualKeys=['oden','coffee','bookstore','arcade','milktea'];
+  var realKeys=['persona','font','custom'];
+  grid.innerHTML=
+    '<div class="type-area-label">🏪 虚拟经营区</div>'+
+    '<div class="type-grid wide">'+virtualKeys.map(function(k){var t=SHOP_TYPES[k];return'<div class="type-item" data-type="'+k+'" onclick="selectType(\''+k+'\')"><div class="type-icon">'+t.icon+'</div><div class="type-name">'+t.name+'</div></div>';}).join('')+'</div>'+
+    '<div class="type-area-label">💎 真实资源区</div>'+
+    '<div class="type-grid wide">'+realKeys.map(function(k){var t=SHOP_TYPES[k];return'<div class="type-item" data-type="'+k+'" onclick="selectType(\''+k+'\')"><div class="type-icon">'+t.icon+'</div><div class="type-name">'+t.name+'</div></div>';}).join('')+'</div>';
+  state.selectedType=null;
+  openSidebar('sbRegister');
+}
+function selectType(type){
+  state.selectedType=type;
+  document.querySelectorAll('.type-item').forEach(function(el){el.classList.toggle('sel',el.dataset.type===type);});
+}
+async function registerShop(){
+  var name=document.getElementById('shopNameInput').value.trim();
+  if(!state.selectedType){toast('请选择店铺类型');return;}
+  if(!name){toast('请输入店名');return;}
+  try{
+    var res=await callTool('market_register_shop',{shop_type:state.selectedType,shop_name:name});
+    if(res&&res.success){toast(res.data.message);closeSidebar('sbRegister');loadHome();}
+    else toast(res&&res.error||'开店失败');
+  }catch(e){toast('错误: '+e.message);}
+}
+
+// ===== 逛街 =====
+async function loadStreet(){
+  var el=document.getElementById('streetContent');
+  el.innerHTML='<div class="loading"><div class="spin"></div><br>加载商业街...</div>';
+  try{
+    var res=await callTool('market_browse_shops',{limit:20});
+    if(res&&res.success&&res.data.length>0){
+      el.innerHTML='<div style="text-align:center;font-size:10px;color:var(--ink3);letter-spacing:1px;margin-bottom:9px">共 '+res.data.length+' 家店铺开业中</div>'+
+        '<div class="shop-grid">'+res.data.map(function(s){
+          return'<div class="shop-card" onclick="openShopDetail(\''+s.id+'\')">'+
+            '<div class="shop-icon">'+s.typeIcon+'</div>'+
+            '<div class="shop-name">'+s.name+'</div>'+
+            '<div class="shop-meta">Lv.'+s.level+'&ensp;'+stars(s.rating)+s.rating+'</div>'+
+            '<div class="shop-meta" style="margin-top:2px">掌柜：'+s.ownerName+'</div>'+
+          '</div>';
+        }).join('')+'</div>';
+    }else{
+      el.innerHTML='<div class="empty"><div class="empty-i">🏜️</div><div class="empty-t">商业街上还没有店铺<br>快去开店吧！</div></div>';
+    }
+  }catch(e){el.innerHTML='<div class="empty"><div class="empty-i">😵</div><div class="empty-t">'+e.message+'</div></div>';}
+}
+
+// ===== 店铺详情 =====
+async function openShopDetail(shopId){
+  var body=document.getElementById('sbShopBody');
+  body.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  document.getElementById('sbShopTitle').textContent='店铺详情';
+  openSidebar('sbShop');
+  state.currentShopId=shopId;
+  try{
+    var res=await callTool('market_get_shop_detail',{shop_id:shopId});
+    if(!res||!res.success){body.innerHTML='<div class="empty">加载失败</div>';return;}
+    var s=res.data;
+    document.getElementById('sbShopTitle').textContent=s.typeIcon+' '+s.name;
+
+    var prodHtml='';
+    if(s.products.length===0){
+      prodHtml='<div style="text-align:center;padding:13px;color:var(--ink3);font-size:11px;letter-spacing:1px">暂无商品</div>';
+    } else {
+      prodHtml=s.products.map(function(p){
+        var st=p.stock===0?'<span style="color:var(--red);font-size:10px"> 售罄</span>':'';
+        var contentArea='';
+        if(s.type==='persona'){
+          // 只显示标题+锁，内容隐藏
+          contentArea='<div class="prod-secret">🔒 人设内容购买后解锁</div>';
+        } else if(s.type==='font'){
+          contentArea='<div class="prod-desc">'+(p.description||'字体包')+'</div>'+
+            '<div class="prod-secret">📦 下载链接购买后获取</div>';
+        } else {
+          contentArea=p.description?'<div class="prod-desc">'+p.description+'</div>':'';
+        }
+        return'<div class="prod">'+
+          '<div class="prod-info">'+
+            '<div class="prod-name">'+p.name+st+'</div>'+
+            contentArea+
+          '</div>'+
+          '<button class="btn btn-sm btn-p" style="flex-shrink:0" onclick="buyProduct(\''+s.id+'\',\''+p.id+'\','+p.price+',\''+s.type+'\')">'+p.price+' 🍊</button>'+
+        '</div>';
+      }).join('');
+    }
+
+    var revHtml=s.reviews.length>0?s.reviews.map(function(r){
+      return'<div class="review"><span class="review-author">'+r.reviewerName+'</span>'+
+        (r.isAi?' <span style="font-size:9px;border:1px solid var(--gold);color:var(--gold);padding:1px 4px">AI</span>':'')+
+        ' <span class="review-stars">'+stars(r.rating)+'</span>'+
+        '<div class="review-text">'+r.content+'</div></div>';
+    }).join(''):'';
+
+    body.innerHTML=
+      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">'+
+        '<span style="font-size:28px;line-height:1">'+s.typeIcon+'</span>'+
+        '<div>'+
+          '<div style="font-size:14px;font-weight:700;letter-spacing:1px">'+s.name+'</div>'+
+          '<div style="font-size:10px;color:var(--ink3);letter-spacing:1px;margin-top:2px">'+s.typeName+' · 掌柜 '+s.ownerName+' · Lv.'+s.level+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--ink2)">'+
+        '<span>'+stars(s.rating)+' '+s.rating+'</span><span>访客 '+s.visitCount+'</span><span>收入 '+s.totalRevenue+' 🍊</span>'+
+      '</div>'+
+      (s.description?'<div style="font-size:11px;color:var(--ink2);margin-bottom:11px;line-height:1.6;padding:8px;background:var(--paper2);border:1px solid var(--border)">'+s.description+'</div>':'')+
+      '<div class="card-title" style="margin-bottom:8px">商品清单</div>'+prodHtml+
+      (revHtml?'<div class="card-title" style="margin:13px 0 8px">顾客评价</div>'+revHtml:'');
+  }catch(e){body.innerHTML='<div class="empty">错误：'+e.message+'</div>';}
+}
+
+// ===== 购买 & 解锁 =====
+async function buyProduct(shopId,productId,price,shopType){
+  if(!confirm('确认花费 '+price+' 橘币购买？'))return;
+  try{
+    var res=await callTool('market_human_buy',{shop_id:shopId,product_id:productId});
+    if(res&&res.success){
+      toast(res.data.message);
+      if(state.data) state.data.coins-=price;
+      document.getElementById('coinDisplay').textContent=(state.data?state.data.coins:0)+' 橘币';
+      // 购买成功后获取商品完整内容并展示解锁侧边栏
+      showUnlocked(shopId,productId,shopType);
+    }else toast(res&&res.error||'购买失败');
+  }catch(e){toast('错误: '+e.message);}
+}
+
+async function showUnlocked(shopId,productId,shopType){
+  var body=document.getElementById('sbUnlockBody');
+  body.innerHTML='<div class="loading"><div class="spin"></div></div>';
+  openSidebar('sbUnlock');
+  try{
+    // 重新拉取商品详情（此时已购买，resource_url可见）
+    var res=await callTool('market_get_shop_detail',{shop_id:shopId});
+    if(!res||!res.success){body.innerHTML='<div class="empty">获取内容失败</div>';return;}
+    var prod=null;
+    (res.data.products||[]).forEach(function(p){if(p.id===productId)prod=p;});
+    if(!prod){body.innerHTML='<div class="empty">商品不存在</div>';return;}
+
+    document.getElementById('sbUnlockTitle').textContent='🔓 '+prod.name;
+
+    var html='<div style="margin-bottom:12px;font-size:12px;color:var(--ink2)">购买成功！以下是解锁内容：</div>';
+    if(shopType==='persona'){
+      html+='<div class="unlocked-box">'+
+        (prod.description||'（卖家暂未填写内容）').replace(/\n/g,'<br>')+
+      '</div>';
+    } else if(shopType==='font'){
+      var signedUrl=null;
+      if(prod.resourceUrl){
+        try{
+          signedUrl=await getSignedUrl(prod.resourceUrl);
+        }catch(se){console.error('[signedUrl]',se);}
+      }
+      html+=
+        '<div style="font-size:12px;font-weight:700;margin-bottom:6px;letter-spacing:.5px">'+prod.name+'</div>'+
+        (prod.description?'<div style="font-size:11px;color:var(--ink2);margin-bottom:10px">'+prod.description+'</div>':'')+
+        '<div class="card-title" style="margin-bottom:6px;font-size:12px">📦 下载字体包</div>'+
+        (signedUrl
+          ?'<div class="unlocked-box"><a href="'+signedUrl+'" style="color:var(--gold);word-break:break-all;display:block;margin-bottom:4px">点击下载字体包</a><div style="font-size:9px;color:var(--ink3)">链接30分钟内有效，长按复制或直接点击下载</div></div>'
+          :'<div style="color:var(--ink3);font-size:11px;font-style:italic">文件暂时无法获取，请联系掌柜。</div>'
+        );
+    } else {
+      html+='<div class="unlocked-box">'+(prod.description||prod.name)+'</div>';
+    }
+    body.innerHTML=html;
+  }catch(e){body.innerHTML='<div class="empty">错误：'+e.message+'</div>';}
+}
+
+// ===== 今日事件 =====
+async function loadEvents(){
+  var el=document.getElementById('eventsContent');
+  el.innerHTML='<div class="loading"><div class="spin"></div><br>加载事件...</div>';
+  try{
+    var res=await callTool('market_get_daily_events');
+    if(res&&res.success&&res.data.length>0){
+      el.innerHTML=
+        '<div class="evbanner">'+
+          '<div class="evbanner-hd">今日商业街动态</div>'+
+          res.data.map(function(e){return'<div class="evrow">'+e.description+(e.multiplier!==1?'<span class="evmult">×'+e.multiplier+'</span>':'')+'</div>';}).join('')+
+        '</div>'+
+        '<div class="card"><div class="card-title">事件效果说明</div>'+
+          '<div class="card-sub">以下事件今日生效，把握机会赚更多橘币！</div>'+
+          res.data.map(function(e){return'<div style="padding:6px 0;font-size:11px;border-bottom:1px dashed var(--border);color:var(--ink2)">'+e.description+(e.multiplier!==1?' <span style="color:var(--red);font-weight:700">×'+e.multiplier+'</span>':'')+'</div>';}).join('')+
+        '</div>';
+    }else{
+      el.innerHTML='<div class="empty"><div class="empty-i">🌤️</div><div class="empty-t">今天风平浪静</div></div>';
+    }
+  }catch(e){el.innerHTML='<div class="empty"><div class="empty-i">😵</div><div class="empty-t">'+e.message+'</div></div>';}
+}
+
+// ===== 离线收益 =====
+async function claimOfflineEarnings(){
+  try{
+    var res=await callTool('market_claim_offline_earnings');
+    if(res&&res.success){
+      toast(res.data.message);
+      document.getElementById('coinDisplay').textContent=res.data.totalCoins+' 橘币';
+      if(state.data)state.data.coins=res.data.totalCoins;
+    }else if(res&&res.data&&res.data.offlineMinutes!==undefined){
+      // 离线不足30分钟，静默处理
+    }else{
+      // 没有店铺或其他错误，静默
+    }
+  }catch(e){console.error('[claimOfflineEarnings]',e);}
+}
+
+// ===== AI到访实时轮询 =====
+function startVisitPolling(){
+  if(visitPollTimer)clearInterval(visitPollTimer);
+  lastVisitPollTime=new Date().toISOString();
+  claimOfflineEarnings();
+  visitPollTimer=setInterval(pollRecentVisits,15000);
+}
+
+async function pollRecentVisits(){
+  try{
+    var res=await callTool('market_get_recent_visits',{since:lastVisitPollTime,limit:5});
+    if(!res||!res.success)return;
+    var data=res.data;
+    if(data.encounterEvents&&data.encounterEvents.length>0){
+      data.encounterEvents.forEach(function(ev){toast(ev.message);});
+    }else if(data.visits&&data.visits.length>0){
+      var latest=data.visits[0];
+      if(latest.action==='purchase')toast('🛒 '+latest.aiName+' 购买了商品（+'+latest.amount+'🍊）');
+      else if(latest.action==='review')toast('⭐ '+latest.aiName+' 评价了你的店铺');
+    }
+    if(data.visits&&data.visits.length>0){
+      lastVisitPollTime=data.visits[0].time;
+    }
+  }catch(e){console.error('[pollRecentVisits]',e);}
+}
+
+document.addEventListener('DOMContentLoaded',function(){wfb(init);});
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>番茄钟</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&display=swap');
+:root{--cream:#faf7f2;--warm:#f0ebe3;--sand:#e4ddd3;--tomato:#c0543a;--tomato-light:#f5e6e2;--tomato-rgb:192,84,58;--sage:#7a9e7e;--sage-light:#e8f0e9;--sage-rgb:122,158,126;--charcoal:#2c2825;--stone:#6b6560;--muted:#9e9790;--border:#e0d9d0;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;background:var(--cream);color:var(--charcoal);-webkit-font-smoothing:antialiased}
+
+.page{width:100%;height:100%;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:0 24px;padding-top:calc(60px + var(--safe-top));-webkit-overflow-scrolling:touch}
+
+/* Header */
+.logo{font-family:'DM Serif Display',serif;font-size:28px;color:var(--tomato);letter-spacing:-0.5px;margin-bottom:4px}
+.subtitle{font-size:12px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+
+/* Mode pill */
+.mode-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:28px;background:var(--tomato-light);color:var(--tomato);border:1px solid rgba(var(--tomato-rgb),.15);transition:all .4s}
+.mode-pill.rest{background:var(--sage-light);color:var(--sage);border-color:rgba(var(--sage-rgb),.15)}
+.mode-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* Timer */
+.timer-wrap{position:relative;width:260px;height:260px;margin-bottom:28px;display:flex;align-items:center;justify-content:center}
+.timer-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--sand);transition:border-color .5s}
+.timer-ring.focus{border-color:var(--tomato)}
+.timer-ring.rest{border-color:var(--sage)}
+.timer-inner{text-align:center;position:relative;z-index:1}
+.timer-num{font-family:'DM Serif Display',serif;font-size:64px;color:var(--charcoal);letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums}
+.timer-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+
+/* Button */
+.btn{width:100%;max-width:280px;padding:14px;border:1.5px solid var(--charcoal);border-radius:100px;font-size:13px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .25s;background:transparent;color:var(--charcoal);font-family:inherit;margin-bottom:24px}
+.btn:active{transform:scale(.98)}
+.btn.filled{background:var(--charcoal);color:var(--cream)}
+.btn.filled:active{background:var(--stone)}
+.btn.tomato{border-color:var(--tomato);color:var(--tomato);background:transparent}
+.btn.sage{border-color:var(--sage);color:var(--sage);background:transparent}
+
+/* Stats */
+.stats-row{display:flex;gap:16px;width:100%;max-width:320px;margin-bottom:24px}
+.stat{text-align:center;flex:1;padding:16px 0;border-top:1px solid var(--border)}
+.stat-val{font-family:'DM Serif Display',serif;font-size:32px;color:var(--charcoal);line-height:1}
+.stat-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+/* History */
+.history{width:100%;max-width:320px;padding-bottom:40px}
+.history-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.h-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.h-idx{font-family:'DM Serif Display',serif;font-size:18px;color:var(--tomato);width:32px}
+.h-time{flex:1;font-size:14px;font-weight:500;color:var(--charcoal)}
+.h-dur{font-size:12px;color:var(--muted)}
+.h-empty{text-align:center;padding:24px 0;font-size:13px;color:var(--muted);font-style:italic}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--cream);padding:10px 20px;border-radius:100px;font-size:13px;display:none;z-index:99;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="logo">Pomodoro</div>
+  <div class="subtitle">Focus &middot; Rest &middot; Repeat</div>
+  <div id="modePill" class="mode-pill"><span class="dot"></span>Ready</div>
+  <div class="timer-wrap">
+    <div id="timerRing" class="timer-ring"></div>
+    <div class="timer-inner">
+      <div id="timerNum" class="timer-num">25:00</div>
+      <div id="timerSub" class="timer-sub">tap to start</div>
+    </div>
+  </div>
+  <button id="btnAction" class="btn filled" onclick="onAction()">Start Focus</button>
+  <div class="stats-row">
+    <div class="stat"><div id="sCount" class="stat-val">0</div><div class="stat-lbl">Tomatoes</div></div>
+    <div class="stat"><div id="sMins" class="stat-val">0</div><div class="stat-lbl">Minutes</div></div>
+  </div>
+  <div class="history">
+    <div class="history-title">Today's Record</div>
+    <div id="histList"><div class="h-empty">No records yet. Start your first tomato.</div></div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+var F=25*60,R=5*60,mode='idle',poll=null;
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function tkey(){var d=new Date();return 'pomodoro_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2500)}
+
+async function loadHist(){try{var v=await Bridge.getData(tkey());if(v){var a=JSON.parse(v);document.getElementById('sCount').textContent=a.length;document.getElementById('sMins').textContent=a.reduce(function(s,i){return s+i.duration},0);renderH(a);return a}}catch(e){}document.getElementById('sCount').textContent='0';document.getElementById('sMins').textContent='0';renderH([]);return[]}
+function renderH(a){var l=document.getElementById('histList');if(!a.length){l.innerHTML='<div class="h-empty">No records yet. Start your first tomato.</div>';return}l.innerHTML=a.map(function(i,n){return '<div class="h-item"><span class="h-idx">'+(n+1)+'</span><span class="h-time">'+i.completedAt+'</span><span class="h-dur">'+i.duration+' min</span></div>'}).join('')}
+async function savePomo(){try{var a=await loadHist();var n=new Date();a.push({completedAt:String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'),duration:25});await Bridge.setData(tkey(),JSON.stringify(a));loadHist();return a.length}catch(e){return 0}}
+
+function updUI(){
+  try{Bridge.getTimerState().then(function(s){
+    var num=document.getElementById('timerNum'),sub=document.getElementById('timerSub'),pill=document.getElementById('modePill'),ring=document.getElementById('timerRing'),btn=document.getElementById('btnAction');
+    if(s.running){num.textContent=fmt(s.remaining);if(mode==='focus'){pill.innerHTML='<span class="dot"></span>Focusing';pill.className='mode-pill';ring.className='timer-ring focus';sub.textContent='stay focused';btn.textContent='Stop';btn.className='btn tomato'}else if(mode==='rest'){pill.innerHTML='<span class="dot"></span>Resting';pill.className='mode-pill rest';ring.className='timer-ring rest';sub.textContent='take a break';btn.textContent='Skip';btn.className='btn sage'}}
+    else{num.textContent=mode==='rest'?'05:00':'25:00';pill.innerHTML='<span class="dot"></span>Ready';pill.className='mode-pill';ring.className='timer-ring';sub.textContent='tap to start';btn.textContent='Start Focus';btn.className='btn filled';mode='idle';if(poll){clearInterval(poll);poll=null}}
+  })}catch(e){}
+}
+
+async function onAction(){
+  if(mode==='focus'||mode==='rest'){try{await Bridge.stopTimer()}catch(e){}try{await Bridge.hideOverlay()}catch(e){}mode='idle';updUI();return}
+  mode='focus';
+  try{var r=await Bridge.startTimer(F);if(r&&r.success===false){toast(r.error||'Cannot start timer');mode='idle';return}
+  showOvl();poll=setInterval(updUI,1000);updUI()}catch(e){toast('Error: '+e.message);mode='idle'}
+}
+
+function showOvl(){try{Bridge.showOverlay(genOvl())}catch(e){}}
+
+function genOvl(){
+return `<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&display=swap');
+:root{--cream:#faf7f2;--warm:#f0ebe3;--sand:#e4ddd3;--tomato:#c0543a;--tomato-rgb:192,84,58;--sage:#7a9e7e;--sage-rgb:122,158,126;--charcoal:#2c2825;--stone:#6b6560;--muted:#9e9790;--border:#e0d9d0;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:var(--cream);color:var(--charcoal);-webkit-font-smoothing:antialiased}
+
+.top{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;padding-top:var(--safe-top);background:rgba(250,247,242,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.top-label{font-family:'DM Serif Display',serif;font-size:16px}
+.top-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:50%;background:none;font-size:14px;color:var(--stone);cursor:pointer}
+.top-close:active{background:var(--warm)}
+
+.center{position:fixed;top:48px;bottom:56px;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:filter .3s}
+.center.blur{filter:blur(4px);pointer-events:none}
+
+.o-ring{width:200px;height:200px;border-radius:50%;border:1.5px solid var(--tomato);display:flex;align-items:center;justify-content:center;transition:border-color .5s}
+.o-ring.rest{border-color:var(--sage)}
+.o-num{font-family:'DM Serif Display',serif;font-size:48px;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.o-mode{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--tomato);margin-top:16px;font-weight:500;transition:color .4s}
+.o-mode.rest{color:var(--sage)}
+.o-info{font-size:12px;color:var(--muted);margin-top:6px}
+
+.bot{position:fixed;bottom:0;left:0;right:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:center;padding:0 20px;padding-bottom:var(--safe-bottom);background:rgba(250,247,242,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border)}
+.btn-chat{width:100%;height:40px;border:1.5px solid var(--charcoal);border-radius:100px;background:none;color:var(--charcoal);font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-chat:active{background:var(--charcoal);color:var(--cream)}
+
+/* Chat overlay */
+.c-overlay{position:fixed;inset:0;z-index:150;background:rgba(44,40,37,.3);opacity:0;pointer-events:none;transition:opacity .35s}
+.c-overlay.open{opacity:1;pointer-events:auto}
+
+/* Chat panel */
+.c-panel{position:fixed;top:0;right:0;bottom:0;width:82%;max-width:380px;z-index:200;background:var(--cream);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.08)}
+.c-panel.open{transform:translateX(0)}
+
+.c-head{padding:16px 20px;padding-top:var(--safe-top);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.c-title{font-family:'DM Serif Display',serif;font-size:18px}
+.c-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:50%;background:none;font-size:12px;color:var(--stone);cursor:pointer}
+.c-close:active{background:var(--warm)}
+
+.c-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.c-msgs::-webkit-scrollbar{width:0}
+
+.m{display:flex;flex-direction:column;max-width:82%}
+.m.u{align-self:flex-end}
+.m.a{align-self:flex-start}
+.m-b{padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.55;word-break:break-word}
+.m.u .m-b{background:var(--charcoal);color:var(--cream);border-bottom-right-radius:4px}
+.m.a .m-b{background:var(--warm);color:var(--charcoal);border-bottom-left-radius:4px}
+.m-t{font-size:10px;color:var(--muted);padding:2px 6px;margin-top:3px}
+.m.u .m-t{text-align:right}
+
+.c-input{padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.c-input textarea{flex:1;min-height:34px;max-height:80px;padding:8px 14px;border:1px solid var(--border);border-radius:100px;font-size:13px;font-family:inherit;background:var(--cream);color:var(--charcoal);resize:none;outline:none;line-height:1.4}
+.c-input textarea:focus{border-color:var(--tomato)}
+.c-input textarea::placeholder{color:var(--muted)}
+.c-send{width:34px;height:34px;border:none;background:var(--charcoal);color:var(--cream);font-size:14px;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.c-send:active{transform:scale(.9)}
+
+.typing{display:inline-flex;gap:4px;padding:4px 0}
+.typing span{width:4px;height:4px;border-radius:50%;background:var(--muted);animation:tp 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes tp{0%,60%,100%{opacity:.3;transform:scale(.8)}30%{opacity:1;transform:scale(1)}}
+</style></head><body>
+<div class="top"><span class="top-label" id="topLbl">Pomodoro</span><button class="top-close" onclick="hide()">✕</button></div>
+<div class="center" id="centerArea">
+  <div class="o-ring" id="oRing"><span class="o-num" id="oNum">25:00</span></div>
+  <div class="o-mode" id="oMode">Focusing</div>
+  <div class="o-info" id="oInfo"></div>
+</div>
+<div class="bot"><button class="btn-chat" onclick="toggleChat()">💬 &nbsp;Chat with AI</button></div>
+<div class="c-overlay" id="cOvl" onclick="toggleChat()"></div>
+<div class="c-panel" id="cPanel">
+  <div class="c-head"><span class="c-title">Chat</span><button class="c-close" onclick="toggleChat()">✕</button></div>
+  <div class="c-msgs" id="cMsgs"></div>
+  <div class="c-input">
+    <textarea id="cInp" placeholder="Say something..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+    <button class="c-send" onclick="send()">↑</button>
+  </div>
+</div>
+<script>
+var F=${25*60},R=${5*60},pIdx=0,mode='focus',chatOn=false;
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+async function tick(){try{var s=await Bridge.getTimerState();document.getElementById('oNum').textContent=fmt(s.remaining)}catch(e){}}
+setInterval(tick,1000);
+async function loadIdx(){try{var d=new Date(),k='pomodoro_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),v=await Bridge.getData(k);if(v){var a=JSON.parse(v);pIdx=a.length;document.getElementById('oInfo').textContent='Tomato #'+(pIdx+1)+' today'}else{pIdx=0;document.getElementById('oInfo').textContent='Tomato #1 today'}}catch(e){}}
+loadIdx();
+function toggleChat(){chatOn=!chatOn;var p=document.getElementById('cPanel'),o=document.getElementById('cOvl'),c=document.getElementById('centerArea');if(chatOn){p.classList.add('open');o.classList.add('open');c.classList.add('blur')}else{p.classList.remove('open');o.classList.remove('open');c.classList.remove('blur')}}
+function addMsg(t,u){var ms=document.getElementById('cMsgs'),d=document.createElement('div');d.className='m '+(u?'u':'a');var n=new Date(),ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');d.innerHTML='<div class="m-b">'+t+'</div><div class="m-t">'+ts+'</div>';ms.appendChild(d);ms.scrollTop=ms.scrollHeight}
+function addTyp(){var ms=document.getElementById('cMsgs'),d=document.createElement('div');d.className='m a';d.id='typM';d.innerHTML='<div class="m-b"><div class="typing"><span></span><span></span><span></span></div></div>';ms.appendChild(d);ms.scrollTop=ms.scrollHeight}
+function rmTyp(){var e=document.getElementById('typM');if(e)e.remove()}
+async function send(){var inp=document.getElementById('cInp'),t=inp.value.trim();if(!t)return;inp.value='';addMsg(t,true);addTyp();try{var s=await Bridge.getTimerState(),ctx=JSON.stringify({mode:mode,remaining:s.remaining,idx:pIdx,count:pIdx}),r=await Bridge.callAI(t,ctx);rmTyp();if(r&&r.success&&r.text)addMsg(r.text,false);else addMsg('AI is unavailable right now.',false)}catch(e){rmTyp();addMsg('AI is unavailable right now.',false)}}
+function hide(){try{Bridge.hideOverlay()}catch(e){}}
+
+window.onTimerEnd=async function(){
+  if(mode==='focus'){
+    var d=new Date(),k='pomodoro_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),a=[];
+    try{var v=await Bridge.getData(k);if(v)a=JSON.parse(v)}catch(e){}
+    var n=new Date();a.push({completedAt:String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'),duration:25});
+    try{await Bridge.setData(k,JSON.stringify(a))}catch(e){}
+    pIdx=a.length;
+    addMsg('🍅 Focus complete! Tomato #'+pIdx+' done. Take a 5-minute break.',false);
+    try{var pr='User completed tomato #'+pIdx+' today, focused for 25 minutes. Briefly encourage them and remember this.';Bridge.callAI(pr,'Count:'+pIdx+',Total:'+(pIdx*25)+'min').then(function(r){if(r&&r.success&&r.text)addMsg(r.text,false)}).catch(function(){})}catch(e){}
+    mode='rest';
+    document.getElementById('oMode').textContent='Resting';document.getElementById('oMode').className='o-mode rest';
+    document.getElementById('oRing').className='o-ring rest';document.getElementById('topLbl').textContent='Rest';
+    try{await Bridge.startTimer(R)}catch(e){}
+  }else if(mode==='rest'){
+    addMsg('⏰ Break over. Ready for the next one!',false);mode='idle';try{Bridge.hideOverlay()}catch(e){}
+  }
+};
+setTimeout(function(){addMsg('🍅 Focus session started. I\\'m here if you need me.',false)},500);
+<\/script></body></html>`;
+}
+
+window.onTimerEnd=async function(){
+  if(mode==='focus'){await savePomo();mode='rest';try{await Bridge.startTimer(R);showOvl();poll=setInterval(updUI,1000)}catch(e){toast('Rest timer failed');mode='idle';updUI()}}
+  else if(mode==='rest'){mode='idle';try{await Bridge.hideOverlay()}catch(e){}updUI()}
+};
+loadHist();
+</script>
+</body>
+</html>

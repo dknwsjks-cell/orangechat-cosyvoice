@@ -1,0 +1,92 @@
+{
+  "id": "com.rerere.co_read",
+  "name": "共读",
+  "description": "AI共读插件：自动分页阅读、批注模式、AI读这页、AI回应批注、侧边批注栏",
+  "version": "2.0.0",
+  "author": "橘瓣",
+  "icon": "📖",
+  "entry": "main.js",
+  "permissions": ["ai_chat", "disable_native_selection"],
+  "customPageWebView": {
+    "entry": "reader.html"
+  },
+  "hookConfigs": {
+    "onPageTurn": {
+      "action": "call_js_function",
+      "function": "on_page_turn",
+      "autoTrigger": true
+    },
+    "onAnnotationAdded": {
+      "action": "call_ai",
+      "promptTemplate": "用户在《{book}》第{chapter}章第{page}页写了一条批注：\n引用：「{quote}」\n心得：{note}\n请用温柔的方式回应这条批注。"
+    }
+  },
+  "tools": [
+    {
+      "name": "import_book",
+      "description": "导入一本书的文本内容，支持纯文本",
+      "parameters": [
+        {
+          "name": "content",
+          "type": "string",
+          "description": "书籍文本内容",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "书名",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get_chapters",
+      "description": "获取书籍的章节列表",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "description": "书名",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get_chapter_content",
+      "description": "获取指定章节的内容",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "description": "书名",
+          "required": true
+        },
+        {
+          "name": "chapter",
+          "type": "integer",
+          "description": "章节序号（从1开始）",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "config": [
+    {
+      "name": "font_size",
+      "type": "number",
+      "label": "字号大小",
+      "description": "阅读页面的字号大小（px）",
+      "default": 18,
+      "required": false
+    },
+    {
+      "name": "line_height",
+      "type": "number",
+      "label": "行高倍数",
+      "description": "阅读页面的行高倍数",
+      "default": 1.8,
+      "required": false
+    }
+  ]
+}

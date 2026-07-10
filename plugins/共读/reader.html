@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>共读</title>
+  <link rel="stylesheet" href="reader.css">
+</head>
+<body>
+  <!-- 顶栏 -->
+  <header class="top-bar">
+    <button class="top-btn" id="btnImport" title="导入">📥</button>
+    <span class="book-title" id="bookTitle">共读</span>
+    <div style="width:40px"></div>
+  </header>
+
+  <!-- 阅读区域 -->
+  <main class="reader-area" id="readerArea">
+    <div class="page-slider" id="pageSlider"></div>
+  </main>
+
+  <!-- 页码跳转栏 -->
+  <div class="page-bar">
+    <span class="page-info" id="pageInfo">第 1 / 1 页</span>
+    <input type="range" class="page-slider-input" id="pageSliderInput" min="1" max="1" value="1">
+  </div>
+
+  <!-- 底栏 -->
+  <footer class="bottom-bar">
+    <button class="action-btn" id="btnChat" style="width:100%">💬 聊天室</button>
+  </footer>
+
+  <!-- 聊天室面板 -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <div class="chat-range-row">
+        <span>第</span>
+        <input type="number" id="chatPageStart" class="chat-page-input" min="1" value="1">
+        <span>页到第</span>
+        <input type="number" id="chatPageEnd" class="chat-page-input" min="1" value="1">
+        <span>页</span>
+      </div>
+      <div class="chat-header-btns">
+        <button class="ai-read-inline-btn" id="btnAiReadInline">🤖阅读</button>
+        <button class="close-btn" id="btnCloseChat">✕</button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <div class="quote-preview" id="quotePreview" style="display:none">
+        <span class="quote-label">📖 引用：</span>
+        <span class="quote-text" id="quoteText"></span>
+        <button class="quote-remove" id="btnRemoveQuote">✕</button>
+      </div>
+      <div class="reply-preview" id="replyPreview" style="display:none">
+        <span class="reply-label">↩ 回复：</span>
+        <span class="reply-name" id="replyName"></span>
+        <span class="reply-snippet" id="replySnippet"></span>
+        <button class="quote-remove" id="btnRemoveReply">✕</button>
+      </div>
+      <div class="input-row">
+        <textarea class="chat-input" id="chatInput" placeholder="写点什么..." rows="1"></textarea>
+        <button class="send-btn" id="btnSend">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天室遮罩 -->
+  <div class="chat-overlay" id="chatOverlay"></div>
+
+  <!-- 书籍列表弹窗 -->
+  <div class="modal-overlay" id="bookListModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📚 我的书架</h3>
+        <button class="close-btn" id="btnCloseBookList">✕</button>
+      </div>
+      <div class="book-list" id="bookList">
+        <div class="book-list-empty">还没有导入书籍，点击📥导入吧</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页码跳转弹窗 -->
+  <div class="modal-overlay" id="pageJumpModal">
+    <div class="modal-content small">
+      <div class="modal-header">
+        <h3>跳转到页</h3>
+        <button class="close-btn" id="btnClosePageJump">✕</button>
+      </div>
+      <div class="page-jump-body">
+        <input type="number" class="page-jump-input" id="pageJumpInput" min="1" placeholder="输入页码">
+        <button class="jump-btn" id="btnPageJump">跳转</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 加载提示 -->
+  <div class="loading-toast" id="loadingToast">加载中...</div>
+
+  <script src="reader.js"></script>
+</body>
+</html>
+</task_progress>
+- [x] 分析现有文件结构
+- [x] 编写 reader.html
+- [ ] 编写 reader.css
+- [ ] 编写 reader.js
+- [ ] 验证完成
+</write_to_file>

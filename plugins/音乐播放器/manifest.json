@@ -1,0 +1,48 @@
+{
+  "id": "com.orangechat.plugin.music_player",
+  "name": "音乐播放器",
+  "version": "1.0.0",
+  "description": "导入音乐文件，AI可自由播放控制，支持后台播放",
+  "author": "橘瓣",
+  "icon": "🎵",
+  "entry": "main.js",
+  "permissions": ["ai_chat"],
+  "customPageWebView": {
+    "entry": "ui/index.html"
+  },
+  "tools": [
+    {
+      "name": "list_songs",
+      "description": "列出所有已导入的音乐文件",
+      "parameters": []
+    },
+    {
+      "name": "play_song",
+      "description": "播放指定名称的音乐，支持后台播放",
+      "parameters": [
+        {"name": "name", "type": "string", "required": true, "description": "音乐文件名"}
+      ]
+    },
+    {
+      "name": "pause_music",
+      "description": "暂停当前正在播放的音乐",
+      "parameters": []
+    },
+    {
+      "name": "resume_music",
+      "description": "恢复播放已暂停的音乐",
+      "parameters": []
+    },
+    {
+      "name": "stop_music",
+      "description": "停止播放音乐",
+      "parameters": []
+    },
+    {
+      "name": "music_status",
+      "description": "查询当前音乐播放状态",
+      "parameters": []
+    }
+  ],
+  "config": []
+}

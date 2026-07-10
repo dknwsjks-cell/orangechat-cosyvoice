@@ -1,0 +1,25 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+
+# 构建产物（所有模块）
+**/build/
+local.properties
+.cursor
+.history
+.kotlin
+node_modules/
+.cache/
+dist/
+.next/
+.env
+**/.gradle/
+**/.idea/
+*.class
+*.jar
+!gradle-wrapper.jar

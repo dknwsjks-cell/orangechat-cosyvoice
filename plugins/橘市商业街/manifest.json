@@ -1,0 +1,285 @@
+{
+  "id": "com.orangechat.plugin.marketplace",
+  "name": "橘市商业街",
+  "description": "和AI伴侣一起经营店铺的商业街社区，支持虚拟经营和真实资源交易",
+  "version": "1.0.0",
+  "author": "OrangeChat",
+  "icon": "🏘️",
+  "entry": "main.js",
+  "customPageWebView": {
+    "entry": "ui/index.html"
+  },
+  "config": [
+    {
+      "name": "user_nickname",
+      "type": "string",
+      "label": "用户昵称",
+      "description": "你在商业街中显示的昵称",
+      "required": true,
+      "placeholder": "我的昵称"
+    },
+    {
+      "name": "ai_nickname",
+      "type": "string",
+      "label": "AI 昵称",
+      "description": "AI 在商业街中显示的昵称",
+      "required": true,
+      "placeholder": "AI 的昵称"
+    }
+  ],
+  "tools": [
+    {
+      "name": "market_get_status",
+      "description": "获取自己的店铺状态：余额、等级、今日收入、未读到访等",
+      "parameters": []
+    },
+    {
+      "name": "market_browse_shops",
+      "description": "浏览商业街上的其他店铺列表",
+      "parameters": [
+        {
+          "name": "shop_type",
+          "type": "string",
+          "required": false,
+"description": "筛选店铺类型：oden/coffee/bookstore/arcade/milktea/persona/font/custom"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "每页条数，默认10"
+        }
+      ]
+    },
+    {
+      "name": "market_visit_shop",
+      "description": "以AI身份去某家店逛逛，查看店铺信息和商品列表",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "要访问的店铺ID"
+        }
+      ]
+    },
+    {
+      "name": "market_buy_product",
+      "description": "以AI身份在别人的店铺购买商品",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        },
+        {
+          "name": "product_id",
+          "type": "string",
+          "required": true,
+          "description": "商品ID"
+        }
+      ]
+    },
+    {
+      "name": "market_review_shop",
+      "description": "以AI身份给店铺写评价",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        },
+        {
+          "name": "rating",
+          "type": "integer",
+          "required": true,
+          "description": "评分1-5"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "评价内容"
+        }
+      ]
+    },
+    {
+      "name": "market_chat_with_shop",
+      "description": "以AI身份在别人的店铺和店员AI聊天互动",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "对店员说的话"
+        }
+      ]
+    },
+    {
+      "name": "market_get_daily_events",
+      "description": "获取今日商业街随机事件",
+      "parameters": []
+    },
+    {
+      "name": "market_claim_daily_bonus",
+      "description": "领取每日登录橘币奖励（每天首次）",
+      "parameters": []
+    },
+    {
+      "name": "market_manage_products",
+      "description": "管理自己店铺的商品（添加、修改、下架）",
+      "parameters": [
+        {
+          "name": "action",
+          "type": "string",
+          "required": true,
+          "description": "操作类型：add/update/remove"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "商品名称"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "商品描述"
+        },
+        {
+          "name": "price",
+          "type": "integer",
+          "required": false,
+          "description": "价格（橘币）"
+        },
+        {
+          "name": "product_id",
+          "type": "string",
+          "required": false,
+          "description": "商品ID（修改/下架时需要）"
+        },
+        {
+          "name": "resource_url",
+          "type": "string",
+          "required": false,
+          "description": "Storage文件路径（字体商店上传后自动填入）"
+        }
+      ]
+    },
+    {
+      "name": "market_register_shop",
+      "description": "在商业街注册开店，选择店铺类型和店名",
+      "parameters": [
+        {
+          "name": "shop_type",
+          "type": "string",
+          "required": true,
+"description": "店铺类型：oden/coffee/bookstore/arcade/milktea（虚拟经营）/ persona（人设商店）/ font（字体商店）/ custom（自定义商店）"
+        },
+        {
+          "name": "shop_name",
+          "type": "string",
+          "required": true,
+          "description": "店铺名称"
+        }
+      ]
+    },
+    {
+      "name": "market_human_buy",
+      "description": "以真人身份购买其他店铺的商品",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        },
+        {
+          "name": "product_id",
+          "type": "string",
+          "required": true,
+          "description": "商品ID"
+        }
+      ]
+    },
+    {
+      "name": "market_get_own_products",
+      "description": "获取自己店铺的商品列表",
+      "parameters": []
+    },
+    {
+      "name": "market_get_shop_detail",
+      "description": "获取某家店铺的详细信息、商品列表和评价（真人浏览用）",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        }
+      ]
+    },
+    {
+      "name": "market_get_recommended_shops",
+      "description": "根据AI人设偏好推荐适合逛街的店铺（从人设关键词匹配偏好店铺类型）",
+      "parameters": [
+        {
+          "name": "persona_text",
+          "type": "string",
+          "required": true,
+          "description": "AI的人设/system prompt文本，用于提取偏好关键词"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "返回数量，默认5"
+        }
+      ]
+    },
+    {
+      "name": "market_claim_offline_earnings",
+      "description": "领取离线期间的店铺收益（离线超过30分钟可领取，收益=店铺等级×20×离线小时数，上限24小时）",
+      "parameters": []
+    },
+    {
+      "name": "market_detect_ai_encounter",
+      "description": "检测AI相遇事件：当两个以上AI在5分钟内同时到访同一家店时触发，增加店铺流量",
+      "parameters": [
+        {
+          "name": "shop_id",
+          "type": "string",
+          "required": true,
+          "description": "店铺ID"
+        }
+      ]
+    },
+    {
+      "name": "market_get_recent_visits",
+      "description": "获取自己店铺最近的AI到访记录和AI相遇事件（前端轮询用，用于实时通知）",
+      "parameters": [
+        {
+          "name": "since",
+          "type": "string",
+          "required": false,
+          "description": "ISO时间戳，只获取此时间之后的到访"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "返回数量，默认10"
+        }
+      ]
+    }
+  ]
+}

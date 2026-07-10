@@ -1,0 +1,99 @@
+{
+  "id": "com.orangechat.plugin.supabase_memory",
+  "name": "Supabase 外置记忆库",
+  "description": "基于 Supabase 的外置记忆库，自动同步聊天记录",
+  "version": "1.0.0",
+  "author": "OrangeChat",
+  "icon": "🗄️",
+  "entry": "main.js",
+  "config": [
+    {
+      "name": "supabase_url",
+      "type": "string",
+      "label": "Supabase URL",
+      "description": "你的 Supabase 项目 URL",
+      "required": true,
+      "placeholder": "https://your-project.supabase.co"
+    },
+    {
+      "name": "supabase_key",
+      "type": "password",
+      "label": "Supabase API Key",
+      "description": "你的 Supabase anon/public API Key",
+      "required": true,
+      "placeholder": "eyJhbGciOiJIUzI1NiIs..."
+    }
+  ],
+  "hooks": [
+    {
+      "event": "message_sent",
+      "handler": "onMessageSent"
+    },
+    {
+      "event": "message_received",
+      "handler": "onMessageReceived"
+    }
+  ],
+  "tools": [
+    {
+      "name": "memory_recall_recent",
+      "description": "获取当前对话最近的30条聊天记录",
+      "parameters": [
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "required": true,
+          "description": "对话ID"
+        }
+      ]
+    },
+    {
+      "name": "memory_search",
+      "description": "按关键词搜索聊天记录",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "搜索关键词"
+        },
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "required": false,
+          "description": "指定对话ID搜索，留空搜索所有对话"
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "返回条数限制，默认20"
+        }
+      ]
+    },
+    {
+      "name": "memory_write",
+      "description": "主动写入记忆库，将自定义内容保存到 Supabase",
+      "parameters": [
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "要写入记忆库的内容"
+        },
+        {
+          "name": "assistant_id",
+          "type": "string",
+          "required": false,
+          "description": "助手ID（可选）"
+        },
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "required": false,
+          "description": "对话ID（可选）"
+        }
+      ]
+    }
+  ]
+}
