@@ -24,17 +24,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      run: |
-        echo "=== Available SDK components ==="
-        ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms dir"
-        ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools dir"
-        echo "=== Installing SDK 36 ==="
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0"
-        echo "=== After install ==="
-        ls $ANDROID_HOME/platforms/
-        ls $ANDROID_HOME/build-tools/
+    - name: Accept Android SDK licenses
+      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
     - name: Grant gradlew permission
       run: chmod +x gradlew
