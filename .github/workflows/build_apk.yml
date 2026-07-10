@@ -58,7 +58,16 @@ jobs:
     - name: Build APK
       run: |
         set -o pipefail
-        ./gradlew :app:assembleDebug --no-daemon --stacktrace --no-configuration-cache 2>&1 | tee build.log
+        ./gradlew :app:assembleDebug --no-daemon --info --no-configuration-cache 2>&1 | tee build.log
+
+    - name: Show compilation errors (on failure)
+      if: failure()
+      run: |
+        echo "=== COMPILATION ERRORS ==="
+        grep -i 'error\|\[e\]\|e: ' build.log | tail -100
+        echo ""
+        echo "=== KOTLIN COMPILER ERRORS ==="
+        grep -A5 'compileDebugKotlin' build.log | tail -30
 
     - name: Upload build log (on failure)
       if: failure()
