@@ -1,12 +1,8 @@
 pluginManagement {
     repositories {
         google()
-        maven { url = uri("https://maven.aliyun.com/repository/google") }
-        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
-        maven { url = uri("https://maven.aliyun.com/repository/public") }
         mavenCentral()
         gradlePluginPortal()
-        maven("https://repo.itextsupport.com/android")
     }
     resolutionStrategy {
         eachPlugin {
