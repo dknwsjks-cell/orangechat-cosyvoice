@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -52,8 +53,9 @@ import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
 import me.rerere.hugeicons.stroke.Mic01
 import me.rerere.hugeicons.stroke.MicOff01
-import me.rerere.hugeicons.stroke.ChevronDown
-import me.rerere.hugeicons.stroke.ChevronUp
+import com.composables.icons.lucide.ChevronDown
+import com.composables.icons.lucide.ChevronUp
+import com.composables.icons.lucide.Lucide
 import me.rerere.rikkahub.service.VoiceCallService
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionRecordAudio
 import me.rerere.rikkahub.ui.components.ui.permission.rememberPermissionState
@@ -258,7 +260,7 @@ fun VoiceCallPage(
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(4.dp)
                     ) {
                         Icon(
-                            imageVector = if (isSubtitleExpanded) HugeIcons.ChevronDown else HugeIcons.ChevronUp,
+                            imageVector = if (isSubtitleExpanded) Lucide.ChevronDown else Lucide.ChevronUp,
                             contentDescription = if (isSubtitleExpanded) "收起文字" else "显示文字",
                             tint = Color.White.copy(alpha = 0.6f),
                             modifier = Modifier.size(20.dp)

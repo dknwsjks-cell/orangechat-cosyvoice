@@ -21,6 +21,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import okio.ByteString
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -41,7 +42,7 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
         providerSetting: TTSProviderSetting.CosyVoice,
         request: TTSRequest
     ): Flow<AudioChunk> = flow {
-        val audioFuture = CompletableFuture<Pair<ByteArray, Boolean>?>()
+        val audioQueue = java.util.concurrent.LinkedBlockingQueue<ByteArray>()
         val errorFuture = CompletableFuture<String>()
         val isTaskStarted = AtomicBoolean(false)
         val isFinished = AtomicBoolean(false)
@@ -64,14 +65,6 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                 put("task_type", "tts")
                 put("action", "continue")
                 put("text", request.text)
-            })
-        }
-
-        val finishTaskPayload = JSONObject().apply {
-            put("task_id", runTaskPayload.getString("task_id"))
-            put("instruction", JSONObject().apply {
-                put("task_type", "tts")
-                put("action", "finish")
             })
         }
 
@@ -108,7 +101,7 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                             "task-finished" -> {
                                 Log.i(TAG, "Task finished")
                                 isFinished.set(true)
-                                audioFuture.complete(null)
+                                audioQueue.add(byteArrayOf())
                                 webSocket.close(1000, "Task finished")
                             }
                             "error" -> {
@@ -125,27 +118,12 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                     }
                 }
 
-                override fun onMessage(webSocket: WebSocket, bytes: okhttp3.ByteString) {
+                override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                     try {
                         val audioData = bytes.toByteArray()
-                        emit(
-                            AudioChunk(
-                                data = audioData,
-                                format = AudioFormat.PCM,
-                                sampleRate = providerSetting.sampleRate,
-                                isLast = false,
-                                metadata = mapOf(
-                                    "provider" to "cosyvoice",
-                                    "model" to providerSetting.model,
-                                    "voice" to providerSetting.voice,
-                                    "sampleRate" to providerSetting.sampleRate.toString(),
-                                    "channels" to "1",
-                                    "bitDepth" to "16"
-                                )
-                            )
-                        )
+                        audioQueue.add(audioData)
                     } catch (e: Exception) {
-                        Log.e(TAG, "Failed to emit audio chunk", e)
+                        Log.e(TAG, "Failed to queue audio chunk", e)
                     }
                 }
 
@@ -157,7 +135,8 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     Log.i(TAG, "WebSocket closed: code=$code, reason=$reason")
                     if (!isFinished.get() && !errorFuture.isDone) {
-                        audioFuture.complete(null)
+                        isFinished.set(true)
+                        audioQueue.add(byteArrayOf())
                     }
                 }
             })
@@ -176,18 +155,35 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                 throw Exception("Timeout waiting for task-started event")
             }
 
-            var finishElapsed = 0L
-            while (!isFinished.get() && !errorFuture.isDone && finishElapsed < 120000) {
-                delay(100)
-                finishElapsed += 100
+            while (!isFinished.get() || !audioQueue.isEmpty()) {
+                val audioData = audioQueue.poll(500, TimeUnit.MILLISECONDS)
+                if (audioData != null) {
+                    if (audioData.isEmpty()) {
+                        break
+                    }
+                    emit(
+                        AudioChunk(
+                            data = audioData,
+                            format = AudioFormat.PCM,
+                            sampleRate = providerSetting.sampleRate,
+                            isLast = false,
+                            metadata = mapOf(
+                                "provider" to "cosyvoice",
+                                "model" to providerSetting.model,
+                                "voice" to providerSetting.voice,
+                                "sampleRate" to providerSetting.sampleRate.toString(),
+                                "channels" to "1",
+                                "bitDepth" to "16"
+                            )
+                        )
+                    )
+                }
+                if (errorFuture.isDone) {
+                    throw Exception(errorFuture.get())
+                }
                 if (!scope.isActive) {
                     break
                 }
-            }
-
-            if (finishElapsed >= 120000) {
-                webSocket.close(1002, "Timeout")
-                throw Exception("Timeout waiting for audio")
             }
 
             if (errorFuture.isDone) {
@@ -277,7 +273,7 @@ class CosyVoiceTTSProvider : TTSProvider<TTSProviderSetting.CosyVoice> {
                 }
             }
 
-            override fun onMessage(webSocket: WebSocket, bytes: okhttp3.ByteString) {
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
