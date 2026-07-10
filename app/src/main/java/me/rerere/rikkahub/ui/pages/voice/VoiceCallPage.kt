@@ -52,6 +52,8 @@ import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
 import me.rerere.hugeicons.stroke.Mic01
 import me.rerere.hugeicons.stroke.MicOff01
+import me.rerere.hugeicons.stroke.ChevronDown
+import me.rerere.hugeicons.stroke.ChevronUp
 import me.rerere.rikkahub.service.VoiceCallService
 import me.rerere.rikkahub.ui.components.ui.permission.PermissionRecordAudio
 import me.rerere.rikkahub.ui.components.ui.permission.rememberPermissionState
@@ -241,11 +243,33 @@ fun VoiceCallPage(
                 VoiceCallStatus.Idle -> uiState.assistantText
                 VoiceCallStatus.Error -> ""
             }
+            
+            var isSubtitleExpanded by remember { mutableStateOf(true) }
             if (subtitleText.isNotBlank()) {
-                StreamingSubtitle(
-                    text = subtitleText,
-                    accentColor = accentColor
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (isSubtitleExpanded) {
+                        StreamingSubtitle(
+                            text = subtitleText,
+                            accentColor = accentColor
+                        )
+                    }
+                    TextButton(
+                        onClick = { isSubtitleExpanded = !isSubtitleExpanded },
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isSubtitleExpanded) HugeIcons.ChevronDown else HugeIcons.ChevronUp,
+                            contentDescription = if (isSubtitleExpanded) "收起文字" else "显示文字",
+                            tint = Color.White.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = if (isSubtitleExpanded) "收起文字" else "显示文字",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
             }
 
             // 错误信息 (保留, 方便调试)

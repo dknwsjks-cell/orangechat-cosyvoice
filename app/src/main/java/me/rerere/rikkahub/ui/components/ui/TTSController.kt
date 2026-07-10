@@ -35,9 +35,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Pause
 import me.rerere.hugeicons.stroke.Play
+import me.rerere.rikkahub.service.VoiceCallService
 import me.rerere.rikkahub.ui.context.LocalTTSState
 import me.rerere.rikkahub.ui.hooks.CustomTtsState
 import me.rerere.tts.model.PlaybackState
@@ -49,11 +51,15 @@ fun TTSController() {
     val ttsState = LocalTTSState.current
 
     val isSpeaking by ttsState.isSpeaking.collectAsState()
+    val isVoiceCallRunning by VoiceCallService.activeConversationId
+        .collectAsStateWithLifecycle(initialValue = null)
     var isVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isSpeaking) {
-        if (isSpeaking) {
+    LaunchedEffect(isSpeaking, isVoiceCallRunning) {
+        if (isSpeaking && isVoiceCallRunning == null) {
             isVisible = true
+        } else {
+            isVisible = false
         }
     }
 

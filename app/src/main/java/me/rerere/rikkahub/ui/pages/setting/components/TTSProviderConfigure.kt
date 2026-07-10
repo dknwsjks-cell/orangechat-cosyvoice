@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,10 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import me.rerere.rikkahub.R
 import me.rerere.rikkahub.ui.components.ui.FormItem
 import me.rerere.rikkahub.ui.components.ui.OutlinedNumberInput
 import me.rerere.tts.provider.TTSProviderSetting
+import me.rerere.tts.provider.providers.CosyVoiceTTSProvider
 
 @Composable
 fun TTSProviderConfigure(
@@ -1353,5 +1359,49 @@ private fun CosyVoiceTTSConfiguration(
             modifier = Modifier.fillMaxWidth(),
             label = "Pitch"
         )
+    }
+
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<Pair<Boolean, String>?>(null) }
+    var showErrorLog by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = {
+            isTesting = true
+            testResult = null
+            CoroutineScope(Dispatchers.IO).launch {
+                CosyVoiceTTSProvider().testConnection(
+                    apiKey = setting.apiKey,
+                    model = setting.model,
+                    voice = setting.voice,
+                    language = setting.language
+                ) { success, message ->
+                    isTesting = false
+                    testResult = Pair(success, message)
+                }
+            }
+        },
+        enabled = !isTesting && setting.apiKey.isNotEmpty(),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(if (isTesting) "测试中..." else "测试连接")
+    }
+
+    testResult?.let { (success, message) ->
+        if (success) {
+            Text(text = "✅ $message", color = androidx.compose.ui.graphics.Color.Green)
+        } else {
+            Column {
+                Text(text = "❌ $message", color = androidx.compose.ui.graphics.Color.Red)
+                if (message.contains("\n")) {
+                    TextButton(onClick = { showErrorLog = !showErrorLog }) {
+                        Text(if (showErrorLog) "收起错误日志" else "查看错误日志")
+                    }
+                    if (showErrorLog) {
+                        Text(text = message, style = androidx.compose.ui.text.TextStyle(fontSize = androidx.compose.ui.unit.sp(12)))
+                    }
+                }
+            }
+        }
     }
 }
