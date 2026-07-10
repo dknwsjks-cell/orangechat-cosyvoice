@@ -27,6 +27,9 @@ jobs:
     - name: Accept Android SDK licenses
       run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+    - name: Install pnpm
+      run: npm install -g pnpm
+
     - name: Grant gradlew permission
       run: chmod +x gradlew
 
