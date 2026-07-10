@@ -34,7 +34,7 @@ jobs:
 
     - name: Install required SDK components
       run: |
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --channel=3 --install "platforms;android-37" "build-tools;37.0.0" "platform-tools" "cmake;3.22.1" "ndk;26.1.10909125"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "cmake;3.22.1" "ndk;26.1.10909125"
 
     - name: Install pnpm
       uses: pnpm/action-setup@v4
