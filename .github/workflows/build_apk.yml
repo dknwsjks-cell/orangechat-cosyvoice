@@ -42,15 +42,17 @@ jobs:
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g"
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-    
-    - name: Upload build log (on failure)
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: build.log
-        retention-days: 3
-    
+
+    - name: Find APK files
+      run: |
+        echo "=== Searching for APK files ==="
+        find . -name "*.apk" -type f 2>/dev/null || true
+        echo "=== Build output structure ==="
+        find app/build/outputs -type f 2>/dev/null | head -50 || true
+        echo "=== Contents of APK dir ==="
+        ls -la app/build/outputs/apk/ 2>/dev/null || echo "No apk dir"
+        ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug dir"
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
