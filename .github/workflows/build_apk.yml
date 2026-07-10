@@ -36,14 +36,25 @@ jobs:
         ls $ANDROID_HOME/platforms/
         ls $ANDROID_HOME/build-tools/
 
-    - name: List Gradle tasks
-      run: |
-        chmod +x gradlew
-        ./gradlew tasks --all 2>&1 | grep -i "assemble" || true
+    - name: Grant gradlew permission
+      run: chmod +x gradlew
 
-    - name: Clean and Build APK
+    - name: Build APK
       run: |
-        ./gradlew clean :app:assembleDebug --no-daemon --stacktrace 2>&1 | tail -50
+        set -o pipefail
+        ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g"
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        ANDROID_HOME: /usr/local/lib/android/sdk
+
+    - name: Upload build log (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-error-log
+        path: build.log
+        retention-days: 3
 
     - name: Find APK files (debug)
       run: |
