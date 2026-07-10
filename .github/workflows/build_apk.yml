@@ -28,13 +28,13 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Accept Android SDK licenses
-      run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-    - name: Install required SDK components
-      run: |
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools" "cmake;3.22.1" "ndk;26.1.10909125"
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 37
+        build-tools: 37.0.0
+        cmake: 3.22.1
+        ndk: 26.1.10909125
 
     - name: Install pnpm
       uses: pnpm/action-setup@v4
