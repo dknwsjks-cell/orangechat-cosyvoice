@@ -38,7 +38,7 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build with Gradle
-      run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee build.log
+      run: ./gradlew :app:assembleDebug --no-daemon --no-configuration-cache --stacktrace 2>&1 | tee build.log
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g"
         ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
